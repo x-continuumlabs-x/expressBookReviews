@@ -105,22 +105,36 @@ public_users.get('/author/:author', async function (req, res) {
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
-  const title = req.params.title;
-  const bookKeys = Object.keys(books);
-  const booksByTitle = [];
-  
-  for (let key of bookKeys) {
-    if (books[key].title === title) {
-      booksByTitle.push(books[key]);
-    }
-  }
-  
-  if (booksByTitle.length > 0) {
-    return res.status(200).json(booksByTitle);
-  } else {
-    return res.status(404).json({message: "No books found with this title"});
-  }
+public_users.get('/title/:title', async function (req, res) {
+	try {
+		const title = req.params.title;
+		
+		// Simulate server request with 2 second timeout
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		
+		// Simulate axios request
+		const response = await new Promise((resolve) => {
+			setTimeout(() => {
+				const bookKeys = Object.keys(books);
+				const booksByTitle = [];
+				
+				for (let key of bookKeys) {
+					if (books[key].title === title) {
+						booksByTitle.push(books[key]);
+					}
+				}
+				resolve({ data: booksByTitle });
+			}, 0);
+		});
+		
+		if (response.data.length > 0) {
+			return res.status(200).json(response.data);
+		} else {
+			return res.status(404).json({message: "No books found with this title"});
+		}
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching books by title" });
+	}
 });
 
 //  Get book review
