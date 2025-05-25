@@ -46,13 +46,28 @@ public_users.get('/', async function (req, res) {
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-	const isbn = req.params.isbn;
-	const book = Object.values(books).find(book => book.isbn === isbn);
-	if (book) {
-		return res.status(200).json(book);
-	} else {
-		return res.status(404).json({ message: "Book not found" });
+public_users.get('/isbn/:isbn', async function (req, res) {
+	try {
+		const isbn = req.params.isbn;
+		
+		// Simulate server request with 2 second timeout
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		
+		// Simulate axios request
+		const response = await new Promise((resolve) => {
+			setTimeout(() => {
+				const book = Object.values(books).find(book => book.isbn === isbn);
+				resolve({ data: book });
+			}, 0);
+		});
+		
+		if (response.data) {
+			return res.status(200).json(response.data);
+		} else {
+			return res.status(404).json({ message: "Book not found" });
+		}
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching book" });
 	}
  });
   
