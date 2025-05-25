@@ -72,21 +72,35 @@ public_users.get('/isbn/:isbn', async function (req, res) {
  });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-	const author = req.params.author;
-	const bookKeys = Object.keys(books);
-	const booksByAuthor = [];
+public_users.get('/author/:author', async function (req, res) {
+	try {
+		const author = req.params.author;
+		
+		// Simulate server request with 2 second timeout
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		
+		// Simulate axios request
+		const response = await new Promise((resolve) => {
+			setTimeout(() => {
+				const bookKeys = Object.keys(books);
+				const booksByAuthor = [];
 
-	for (let key of bookKeys) {
-		if (books[key].author === author) {
-			booksByAuthor.push(books[key]);
+				for (let key of bookKeys) {
+					if (books[key].author === author) {
+						booksByAuthor.push(books[key]);
+					}
+				}
+				resolve({ data: booksByAuthor });
+			}, 0);
+		});
+
+		if (response.data.length > 0) {
+			return res.status(200).json(response.data);
+		} else {
+			return res.status(404).json({message: "No books found by this author"});
 		}
-	}
-
-	if (booksByAuthor.length > 0) {
-		return res.status(200).json(booksByAuthor);
-	} else {
-		return res.status(404).json({message: "No books found by this author"});
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching books by author" });
 	}
 });
 
