@@ -28,12 +28,11 @@ regd_users.post("/login", (req,res) => {
     // Generate JWT token
     let accessToken = jwt.sign({
       data: username
-    }, 'access', { expiresIn: 60 * 60 });
+    }, 'fingerprint_customer', { expiresIn: 60 * 60 });
     
     // Save token in session
-    req.session.authorization = {
-      accessToken, username
-    };
+    req.session.accessToken = accessToken;
+    req.session.username = username;
     
     return res.status(200).json({message: "User successfully logged in"});
   } else {
@@ -43,8 +42,31 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const isbn = req.params.isbn;
+  const review = req.query.review;
+  const username = req.session.username;
+  
+  // Check if review is provided
+  if (!review) {
+    return res.status(400).json({message: "Review is required"});
+  }
+  
+  // Find the book by ISBN
+  const book = Object.values(books).find(book => book.isbn === isbn);
+  
+  if (!book) {
+    return res.status(404).json({message: "Book not found"});
+  }
+  
+  // Initialize reviews object if it doesn't exist or is a string
+  if (typeof book.reviews === 'string' || !book.reviews) {
+    book.reviews = {};
+  }
+  
+  // Add or modify the review for the current user
+  book.reviews[username] = review;
+  
+  return res.status(200).json({message: "Review added/modified successfully"});
 });
 
 module.exports.authenticated = regd_users;
